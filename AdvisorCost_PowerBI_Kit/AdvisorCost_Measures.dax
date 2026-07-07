@@ -1,0 +1,56 @@
+-- Copia cada medida en Power BI (Home → New Measure)
+-- Tabla base: Advisor
+
+Total Recomendaciones = COUNTROWS(Advisor)
+
+Ahorro Anual Total = SUM(Advisor[AnnualSavingsUSD])
+
+Ahorro Anual (Formato) =
+FORMAT([Ahorro Anual Total], "$#,##0")
+
+Recomendaciones Alto Impacto =
+CALCULATE(COUNTROWS(Advisor), Advisor[Impact] = "High")
+
+Recomendaciones Medio Impacto =
+CALCULATE(COUNTROWS(Advisor), Advisor[Impact] = "Medium")
+
+Recomendaciones Bajo Impacto =
+CALCULATE(COUNTROWS(Advisor), Advisor[Impact] = "Low")
+
+Ahorro Alto Impacto =
+CALCULATE([Ahorro Anual Total], Advisor[Impact] = "High")
+
+% Ahorro Alto Impacto =
+DIVIDE([Ahorro Alto Impacto], [Ahorro Anual Total], 0)
+
+Suscripciones Evaluadas =
+DISTINCTCOUNT(Advisor[Subscription])
+
+Ahorro Promedio por Recomendación =
+DIVIDE([Ahorro Anual Total], [Total Recomendaciones], 0)
+
+Top Suscripción (Ahorro) =
+VAR Tabla =
+    ADDCOLUMNS(
+        VALUES(Advisor[Subscription]),
+        "@Ahorro", [Ahorro Anual Total]
+    )
+VAR Top =
+    TOPN(1, Tabla, [@Ahorro], DESC)
+RETURN
+    CONCATENATEX(Top, Advisor[Subscription], ", ")
+
+Ahorro Reserved Instances =
+CALCULATE(
+    [Ahorro Anual Total],
+    Advisor[RecommendationName] IN {"VM Reserved Instance", "Azure Files Reserved Instance", "App Service Reserved Instance"}
+)
+
+Ahorro Savings Plan =
+CALCULATE([Ahorro Anual Total], Advisor[RecommendationName] = "Savings Plan")
+
+Ahorro Right-Size =
+CALCULATE([Ahorro Anual Total], Advisor[RecommendationName] = "Right-size / Shutdown VM")
+
+Ranking Suscripción =
+RANKX(ALL(Advisor[Subscription]), [Ahorro Anual Total], , DESC, Dense)

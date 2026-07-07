@@ -1,0 +1,13 @@
+# Datos generados (contienen información real de suscripciones y costos)
+*.csv
+*.xlsx
+*.zip
+
+# Copias locales con IDs reales (no publicar)
+*.local.*
+
+# Notas en texto plano (solo se publican los README .md)
+*.txt
+
+# Archivos temporales de Office
+~$*
